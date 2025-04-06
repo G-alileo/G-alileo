@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/G-alileo/G-alileo/main/assets/custom_binary_banner.gif" alt="Backend Binary Rain" width="100%" height="300" />
+  <img src="https://raw.githubusercontent.com/G-alileo/G-alileo/main/assets/code.gif" alt="Backend Binary Rain" width="100%" height="300" />
 </p>
 
 <h1 align="center">Hey there 👋, I'm Jamespeter Murithi</h1>
