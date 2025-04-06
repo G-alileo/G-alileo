@@ -4,13 +4,13 @@
 
 <h1 align="center">Hey there 👋, I'm Jamespeter Murithi</h1>
 
-<p align="center">
-  <h2 align="center">
-    <a href="https://github.com/G-alileo">
+
+<h2 align="center">
+   <a href="https://github.com/G-alileo">
     <img align="center" width="100%" src="https://readme-typing-svg.herokuapp.com?font=Times+New+Roman&color=%2300BFFF&size=35&center=true&vCenter=true&width=600&lines=Software+Developer+%7C+Back-End+Engineer;Builder+of+RESTful+APIs+That+Scale;Clean+Code+%7C+Real-World+Architecture;Always+Learning+%7C+Always+Building;" alt="Typing SVG"/>
-    </a>
-  </h2>
-</p>
+   </a>
+ </h2>
+
 
 ---
 
@@ -55,5 +55,5 @@ Looking to team up on projects or ideas with fellow developers. Always ready to 
 ---
 
 <p align="center">
-   <i style="color:#00BFFF;">"Simplicity in the frontend. Power in the backend."</i>
+   <img src="https://readme-typing-svg.herokuapp.com?font=Times+New+Roman&color=%2300BFFF&size=24&center=true&vCenter=true&width=600&lines=Simplicity+in+the+frontend.+Power+in+the+backend." alt="Quote SVG"/>
 </p>
