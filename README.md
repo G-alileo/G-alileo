@@ -5,8 +5,11 @@
 <h1 align="center">Hey there 👋, I'm Jamespeter Murithi</h1>
 
 <p align="center">
-  <i>Backend Developer | Pythonista | API Artisan</i><br>
-  <i>Based in Nairobi, Kenya 🇰🇪</i>
+  <h2 align="center">
+    <a href="https://github.com/G-alileo">
+    <img align="center" width="100%" src="https://readme-typing-svg.herokuapp.com?font=Times+New+Roman&color=%2300BFFF&size=35&center=true&vCenter=true&width=600&lines=Software+Developer+%7C+Back-End+Engineer;Builder+of+RESTful+APIs+That+Scale;Clean+Code+%7C+Real-World+Architecture;Always+Learning+%7C+Always+Building;" alt="Typing SVG"/>
+    </a>
+  </h2>
 </p>
 
 ---
