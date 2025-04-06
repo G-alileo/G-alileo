@@ -55,5 +55,5 @@ Looking to team up on projects or ideas with fellow developers. Always ready to 
 ---
 
 <p align="center">
-  <i>"Simplicity in the frontend. Power in the backend."</i>
+   <i style="color:#00BFFF;">"Simplicity in the frontend. Power in the backend."</i>
 </p>
