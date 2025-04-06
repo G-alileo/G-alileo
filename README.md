@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/JamespeterMurithi/JamespeterMurithi/main/assets/custom_binary_banner.gif" alt="Backend Binary Rain" width="100%" />
+</p>
+
 <h1 align="center">Hey there 👋, I'm Jamespeter Murithi</h1>
 
 <p align="center">
@@ -37,7 +41,7 @@ Looking to team up on projects or ideas with fellow developers. Always ready to 
 ### 💡 Dev Quote of the Day
 
 ```python
- “A good backend is like a great referee — invisible, but essential.”
+# “A good backend is like a great referee — invisible, but essential.”
 ```
 
 ---
