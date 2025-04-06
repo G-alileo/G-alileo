@@ -37,7 +37,7 @@ Looking to team up on projects or ideas with fellow developers. Always ready to 
 ### 💡 Dev Quote of the Day
 
 ```python
-# “A good backend is like a great referee — invisible, but essential.”
+ “A good backend is like a great referee — invisible, but essential.”
 ```
 
 ---
