@@ -56,6 +56,7 @@ class JamesMurithi:
 
 </div>
 
+
 <br>
 
 ### Contribution Activity
@@ -65,7 +66,7 @@ class JamesMurithi:
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/G-alileo/G-alileo/output/github-snake-dark.svg" />
   <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/G-alileo/G-alileo/output/github-snake.svg" />
-  <img alt="contribution snake" src="https://raw.githubusercontent.com/G-alileo/G-alileo/output/github-snake.svg" />
+  <img alt="contribution snake" src="https://raw.githubusercontent.com/G-alileo/G-alileo/output/github-snake-dark.svg" />
 </picture>
 
 </div>
