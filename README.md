@@ -52,12 +52,7 @@ class JamesMurithi:
 
 <div align="center">
 
-<img height="160" src="https://github-readme-stats.vercel.app/api?username=G-alileo&theme=tokyonight&hide_border=true&show_icons=true&hide=prs,issues&rank_icon=percentile&include_all_commits=true" />
-<img height="160" src="https://github-readme-stats.vercel.app/api/top-langs/?username=G-alileo&theme=tokyonight&hide_border=true&layout=compact&langs_count=6" />
-
-<br/>
-
-<img src="https://nirzak-streak-stats.vercel.app/?user=G-alileo&theme=tokyonight&hide_border=true" height="150"/>
+<img src="./profile-stats.svg" alt="G-alileo stats" width="820"/>
 
 </div>
 
