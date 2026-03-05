@@ -62,30 +62,6 @@ class JamesMurithi:
 
 <div align="center">
 
-<!--
-  ⚙️ SETUP REQUIRED — Snake Animation
-  Add this to .github/workflows/snake.yml in your profile repo:
-
-  name: Snake
-  on:
-    schedule: [{ cron: "0 0 * * *" }]
-    workflow_dispatch:
-  jobs:
-    build:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: Platane/snk@v3
-          with:
-            github_user_name: G-alileo
-            outputs: |
-              dist/github-snake.svg
-              dist/github-snake-dark.svg?palette=github-dark
-        - uses: crazy-max/ghaction-github-pages@v3
-          with:
-            target_branch: output
-            build_dir: dist
--->
-
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/G-alileo/G-alileo/output/github-snake-dark.svg" />
   <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/G-alileo/G-alileo/output/github-snake.svg" />
