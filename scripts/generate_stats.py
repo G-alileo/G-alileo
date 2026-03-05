@@ -1,13 +1,12 @@
 import os
 import json
 import urllib.request
-import urllib.error
 from datetime import datetime, timezone
 from collections import defaultdict
 
-USERNAME  = "G-alileo"
-TOKEN     = os.environ.get("GITHUB_TOKEN", "")
-OUT_PATH  = os.path.join(os.path.dirname(__file__), "..", "profile-stats.svg")
+USERNAME = "G-alileo"
+TOKEN    = os.environ.get("GITHUB_TOKEN", "")
+OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "profile-stats.svg")
 
 HEADERS = {
     "Authorization": f"bearer {TOKEN}",
@@ -15,42 +14,42 @@ HEADERS = {
     "User-Agent":    "profile-stats-generator",
 }
 
-BG          = "#0d1117"
-BG2         = "#161b22"
-BG3         = "#1f2937"
-BORDER      = "#30363d"
-ACCENT      = "#4fc3f7"
-ACCENT2     = "#7ee787"
-ACCENT3     = "#f78166"
-MUTED       = "#8b949e"
-TEXT        = "#e6edf3"
-TEXT_DIM    = "#6e7681"
-DOT_RED     = "#ff5f57"
-DOT_YEL     = "#febc2e"
-DOT_GRN     = "#28c840"
+BG      = "#0d1117"
+BG2     = "#161b22"
+BG3     = "#1c2330"
+BORDER  = "#30363d"
+ACCENT  = "#4fc3f7"
+GREEN   = "#7ee787"
+ORANGE  = "#ffa657"
+YELLOW  = "#e3b341"
+RED_S   = "#f78166"
+MUTED   = "#8b949e"
+TEXT    = "#e6edf3"
+DIM     = "#6e7681"
+DOT_R   = "#ff5f57"
+DOT_Y   = "#febc2e"
+DOT_G   = "#28c840"
 
 LANG_COLORS = {
-    "Python":     "#3572A5",
-    "JavaScript": "#f1e05a",
-    "TypeScript": "#3178c6",
-    "HTML":       "#e34c26",
-    "CSS":        "#563d7c",
-    "Java":       "#b07219",
-    "C++":        "#f34b7d",
-    "C":          "#555555",
-    "PHP":        "#4F5D95",
-    "Shell":      "#89e051",
-    "Dockerfile": "#384d54",
-    "Makefile":   "#427819",
+    "Python":           "#3572A5",
+    "JavaScript":       "#f1e05a",
+    "TypeScript":       "#3178c6",
+    "HTML":             "#e34c26",
+    "CSS":              "#563d7c",
+    "Java":             "#b07219",
+    "C++":              "#f34b7d",
+    "C":                "#555555",
+    "PHP":              "#4F5D95",
+    "Shell":            "#89e051",
+    "Jupyter Notebook": "#DA5B0B",
+    "Makefile":         "#427819",
 }
 
 def gql(query, variables=None):
     payload = json.dumps({"query": query, "variables": variables or {}}).encode()
     req = urllib.request.Request(
         "https://api.github.com/graphql",
-        data=payload,
-        headers=HEADERS,
-        method="POST",
+        data=payload, headers=HEADERS, method="POST",
     )
     with urllib.request.urlopen(req, timeout=20) as r:
         return json.loads(r.read().decode())
@@ -59,31 +58,23 @@ def fetch_stats():
     q = """
     query($login: String!) {
       user(login: $login) {
-        name
         repositories(first: 100, ownerAffiliations: OWNER, isFork: false) {
           nodes {
             stargazerCount
             languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
-              edges { size node { name color } }
+              edges { size node { name } }
             }
           }
         }
         contributionsCollection {
           totalCommitContributions
-          totalPullRequestContributions
           restrictedContributionsCount
           contributionCalendar {
             totalContributions
-            weeks {
-              contributionDays {
-                contributionCount
-                date
-              }
-            }
+            weeks { contributionDays { contributionCount date } }
           }
         }
         followers { totalCount }
-        following { totalCount }
       }
     }
     """
@@ -106,146 +97,127 @@ def fetch_stats():
     days.sort(key=lambda d: d["date"], reverse=True)
 
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    current_streak = 0
+    streak = 0
     for day in days:
         if day["date"] > today_str:
             continue
         if day["contributionCount"] > 0:
-            current_streak += 1
+            streak += 1
         else:
             break
 
-    total_contributions = data["contributionsCollection"]["contributionCalendar"]["totalContributions"]
-    commits = data["contributionsCollection"]["totalCommitContributions"] + \
-              data["contributionsCollection"]["restrictedContributionsCount"]
-
-    grid_days = days[:91][::-1]
+    commits = (data["contributionsCollection"]["totalCommitContributions"] +
+               data["contributionsCollection"]["restrictedContributionsCount"])
 
     return {
-        "name":          data["name"] or USERNAME,
         "stars":         total_stars,
         "followers":     data["followers"]["totalCount"],
         "commits":       commits,
-        "contributions": total_contributions,
-        "streak":        current_streak,
+        "contributions": data["contributionsCollection"]["contributionCalendar"]["totalContributions"],
+        "streak":        streak,
         "langs":         lang_pcts,
-        "grid":          grid_days,
+        "grid":          days[:91][::-1],
     }
 
 def build_svg(s):
-    W, H = 820, 340
-    now  = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    W   = 820
+    H   = 260
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
-    grid_cells = []
-    CELL = 9
-    GAP  = 2
-    grid_x0 = 32
-    grid_y0 = 270
-    levels = [0, 2, 5, 10]
-    colors = ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"]
-
-    for i, day in enumerate(s["grid"]):
-        col = i // 7
-        row = i %  7
-        x   = grid_x0 + col * (CELL + GAP)
-        y   = grid_y0 + row * (CELL + GAP)
-        c   = day["contributionCount"]
-        if   c == 0: clr = colors[0]
-        elif c < 3:  clr = colors[1]
-        elif c < 6:  clr = colors[2]
-        elif c < 10: clr = colors[3]
-        else:         clr = colors[4]
-        grid_cells.append(
-            f'<rect x="{x}" y="{y}" width="{CELL}" height="{CELL}" '
-            f'rx="2" fill="{clr}" opacity="0.9"/>'
-        )
-    grid_svg = "\n    ".join(grid_cells)
-
-    lang_bars = []
-    BAR_X  = 460
-    BAR_Y0 = 110
-    BAR_W  = 320
-    BAR_H  = 10
-    for idx, (lang, pct) in enumerate(s["langs"]):
-        y      = BAR_Y0 + idx * 30
-        fill   = LANG_COLORS.get(lang, ACCENT)
-        filled = max(4, int(pct / 100 * BAR_W))
-        lang_bars.append(f"""
-    <text x="{BAR_X}" y="{y - 2}" font-size="11" fill="{MUTED}" font-family="'JetBrains Mono',monospace">{lang}</text>
-    <rect x="{BAR_X}" y="{y + 2}" width="{BAR_W}" height="{BAR_H}" rx="5" fill="{BG3}"/>
-    <rect x="{BAR_X}" y="{y + 2}" width="{filled}" height="{BAR_H}" rx="5" fill="{fill}" opacity="0.9"/>
-    <text x="{BAR_X + BAR_W + 8}" y="{y + 11}" font-size="10" fill="{TEXT_DIM}" font-family="'JetBrains Mono',monospace">{pct}%</text>""")
-    lang_svg = "".join(lang_bars)
-
-    stats = [
-        ("total_commits",       str(s["commits"]),       ACCENT,  "commits"),
-        ("contributions",       str(s["contributions"]), ACCENT2, "this year"),
-        ("current_streak",      str(s["streak"]),        "#ffa657","days"),
-        ("stars_earned",        str(s["stars"]),         "#e3b341","stars"),
-        ("followers",           str(s["followers"]),     ACCENT3, "followers"),
+    stat_items = [
+        ("commits",       str(s["commits"]),       ACCENT),
+        ("contributions", str(s["contributions"]), GREEN),
+        ("streak",        f"{s['streak']} days",   ORANGE),
+        ("stars",         str(s["stars"]),          YELLOW),
+        ("followers",     str(s["followers"]),      RED_S),
     ]
-    stat_rows = []
-    for i, (key, val, color, label) in enumerate(stats):
-        y = 118 + i * 28
-        stat_rows.append(f"""
-    <text x="34" y="{y}" font-size="11" fill="{TEXT_DIM}" font-family="'JetBrains Mono',monospace">{key}</text>
-    <text x="200" y="{y}" font-size="11" fill="{color}" font-family="'JetBrains Mono',monospace" font-weight="700">{val} <tspan fill="{MUTED}" font-weight="400">{label}</tspan></text>""")
-    stat_svg = "".join(stat_rows)
+    CARD_W   = 136
+    CARD_H   = 62
+    CARD_Y   = 58
+    CARD_GAP = 10
+    CARDS_TOTAL = len(stat_items) * CARD_W + (len(stat_items) - 1) * CARD_GAP
+    card_x0 = (W - CARDS_TOTAL) // 2
+
+    stat_cards = []
+    for i, (label, val, color) in enumerate(stat_items):
+        cx = card_x0 + i * (CARD_W + CARD_GAP)
+        stat_cards.append(
+            f'<rect x="{cx}" y="{CARD_Y}" width="{CARD_W}" height="{CARD_H}" rx="8" fill="{BG3}" stroke="{BORDER}" stroke-width="0.8"/>'
+            f'<text x="{cx + CARD_W//2}" y="{CARD_Y + 22}" text-anchor="middle" font-size="9" fill="{MUTED}" font-family="\'JetBrains Mono\',monospace" letter-spacing="0.5">{label.upper()}</text>'
+            f'<text x="{cx + CARD_W//2}" y="{CARD_Y + 46}" text-anchor="middle" font-size="18" fill="{color}" font-family="\'JetBrains Mono\',monospace" font-weight="700">{val}</text>'
+        )
+    stat_svg = "\n  ".join(stat_cards)
+
+    LB_X  = 32
+    LB_Y0 = 160
+    LB_W  = W - 130   
+    LB_H  = 8
+    ROW_H = 24
+
+    lang_svg_parts = [
+        f'<text x="{LB_X}" y="{LB_Y0 - 14}" font-size="9" fill="{DIM}" font-family="\'JetBrains Mono\',monospace" letter-spacing="1">▸ LANGUAGES</text>',
+        f'<line x1="{LB_X}" y1="{LB_Y0 - 8}" x2="{W - 20}" y2="{LB_Y0 - 8}" stroke="{BORDER}" stroke-width="0.6"/>',
+    ]
+    for idx, (lang, pct) in enumerate(s["langs"]):
+        col    = idx % 2
+        row    = idx // 2
+        x      = LB_X + col * (W // 2)
+        y      = LB_Y0 + row * ROW_H
+        bw     = (LB_W // 2) - 10
+        fill   = LANG_COLORS.get(lang, ACCENT)
+        bar    = max(4, int(pct / 100 * bw))
+        lang_svg_parts.append(
+            f'<text x="{x}" y="{y}" font-size="9.5" fill="{MUTED}" font-family="\'JetBrains Mono\',monospace">{lang}</text>'
+            f'<rect x="{x}" y="{y + 3}" width="{bw}" height="{LB_H}" rx="4" fill="{BG3}"/>'
+            f'<rect x="{x}" y="{y + 3}" width="{bar}" height="{LB_H}" rx="4" fill="{fill}" opacity="0.85"/>'
+            f'<text x="{x + bw + 6}" y="{y + 11}" font-size="9" fill="{DIM}" font-family="\'JetBrains Mono\',monospace">{pct}%</text>'
+        )
+    lang_svg = "\n  ".join(lang_svg_parts)
 
     svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">
   <defs>
-    <linearGradient id="bg_grad" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%"   stop-color="#0d1117"/>
       <stop offset="100%" stop-color="#111827"/>
     </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="2.5" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
   </defs>
 
-  <!-- background -->
-  <rect width="{W}" height="{H}" rx="14" fill="url(#bg_grad)"/>
+  <!-- card -->
+  <rect width="{W}" height="{H}" rx="14" fill="url(#bg)"/>
   <rect width="{W}" height="{H}" rx="14" fill="none" stroke="{BORDER}" stroke-width="1"/>
 
   <!-- title bar -->
-  <rect width="{W}" height="42" rx="14" fill="{BG2}"/>
-  <rect y="28" width="{W}" height="14" fill="{BG2}"/>
-  <rect x="1" y="42" width="{W-2}" height="1" fill="{BORDER}"/>
+  <rect width="{W}" height="44" rx="14" fill="{BG2}"/>
+  <rect y="30" width="{W}" height="14" fill="{BG2}"/>
+  <rect x="1" y="44" width="{W - 2}" height="1" fill="{BORDER}"/>
 
-  <!-- traffic lights -->
-  <circle cx="22" cy="21" r="6" fill="{DOT_RED}"/>
-  <circle cx="42" cy="21" r="6" fill="{DOT_YEL}"/>
-  <circle cx="62" cy="21" r="6" fill="{DOT_GRN}"/>
+  <!-- linux window buttons — right side, elegant line style -->
+  <!-- minimize -->
+  <rect x="{W - 74}" y="15" width="18" height="16" rx="4" fill="#2a2f3a" stroke="{BORDER}" stroke-width="0.7"/>
+  <line x1="{W - 69}" y1="23" x2="{W - 60}" y2="23" stroke="{MUTED}" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- maximize -->
+  <rect x="{W - 51}" y="15" width="18" height="16" rx="4" fill="#2a2f3a" stroke="{BORDER}" stroke-width="0.7"/>
+  <rect x="{W - 46}" y="20" width="8" height="6" rx="1" fill="none" stroke="{MUTED}" stroke-width="1.2"/>
+  <!-- close -->
+  <rect x="{W - 28}" y="15" width="18" height="16" rx="4" fill="#c0392b" stroke="#a93226" stroke-width="0.7"/>
+  <line x1="{W - 23}" y1="19" x2="{W - 15}" y2="27" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+  <line x1="{W - 15}" y1="19" x2="{W - 23}" y2="27" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
 
-  <!-- title -->
-  <text x="{W//2}" y="26" text-anchor="middle" font-size="12"
-        font-family="'JetBrains Mono',monospace" fill="{MUTED}">
-    ~/G-alileo/stats.py — last updated {now}
-  </text>
+  <!-- prompt -->
+  <text x="16" y="27" font-size="11" font-family="'JetBrains Mono',monospace" fill="{GREEN}">james@ubuntu</text>
+  <text x="114" y="27" font-size="11" font-family="'JetBrains Mono',monospace" fill="{MUTED}">:</text>
+  <text x="122" y="27" font-size="11" font-family="'JetBrains Mono',monospace" fill="{ACCENT}">~/G-alileo</text>
+  <text x="198" y="27" font-size="11" font-family="'JetBrains Mono',monospace" fill="{MUTED}">$ python stats.py</text>
+  <text x="{W - 90}" y="27" text-anchor="end" font-size="9" font-family="'JetBrains Mono',monospace" fill="{DIM}">{now}</text>
 
-  <!-- LEFT PANEL — stats ──────────────────────────────────────── -->
-  <text x="34" y="80" font-size="10" fill="{TEXT_DIM}" font-family="'JetBrains Mono',monospace" letter-spacing="1">▸ OVERVIEW</text>
-  <line x1="34" y1="86" x2="420" y2="86" stroke="{BORDER}" stroke-width="0.8"/>
+  <!-- stat cards -->
   {stat_svg}
 
-  <!-- DIVIDER -->
-  <line x1="440" y1="58" x2="440" y2="{H - 20}" stroke="{BORDER}" stroke-width="0.8"/>
+  <!-- divider -->
+  <line x1="20" y1="136" x2="{W - 20}" y2="136" stroke="{BORDER}" stroke-width="0.6"/>
 
-  <!-- RIGHT PANEL — languages ─────────────────────────────────── -->
-  <text x="{BAR_X}" y="80" font-size="10" fill="{TEXT_DIM}" font-family="'JetBrains Mono',monospace" letter-spacing="1">▸ LANGUAGES</text>
-  <line x1="{BAR_X}" y1="86" x2="{W - 20}" y2="86" stroke="{BORDER}" stroke-width="0.8"/>
+  <!-- languages -->
   {lang_svg}
-
-  <!-- BOTTOM — contribution grid ───────────────────────────────── -->
-  <line x1="20" y1="258" x2="{W - 20}" y2="258" stroke="{BORDER}" stroke-width="0.8"/>
-  <text x="34" y="252" font-size="10" fill="{TEXT_DIM}" font-family="'JetBrains Mono',monospace" letter-spacing="1">▸ CONTRIBUTIONS  last 13 weeks</text>
-  {grid_svg}
-
-  <!-- streak badge -->
-  <rect x="{W - 160}" y="265" width="140" height="52" rx="8" fill="{BG3}" stroke="{BORDER}" stroke-width="0.8"/>
-  <text x="{W - 90}" y="285" text-anchor="middle" font-size="9" fill="{MUTED}" font-family="'JetBrains Mono',monospace">current_streak</text>
-  <text x="{W - 90}" y="308" text-anchor="middle" font-size="22" fill="#ffa657" font-family="'JetBrains Mono',monospace" font-weight="700" filter="url(#glow)">{s["streak"]}</text>
 </svg>"""
 
     return svg
@@ -254,8 +226,6 @@ if __name__ == "__main__":
     print("Fetching GitHub stats...")
     stats = fetch_stats()
     print(f"  commits={stats['commits']}  streak={stats['streak']}  stars={stats['stars']}")
-    print(f"  top langs: {[l[0] for l in stats['langs']]}")
-
     svg = build_svg(stats)
     out = os.path.abspath(OUT_PATH)
     with open(out, "w", encoding="utf-8") as f:
