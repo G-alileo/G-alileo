@@ -98,13 +98,19 @@ def fetch_stats():
 
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     streak = 0
+    found_first = False
+
     for day in days:
         if day["date"] > today_str:
             continue
+        if day["date"] == today_str and day["contributionCount"] == 0:
+            continue
         if day["contributionCount"] > 0:
             streak += 1
+            found_first = True
         else:
-            break
+            if found_first:
+                break
 
     commits = (data["contributionsCollection"]["totalCommitContributions"] +
                data["contributionsCollection"]["restrictedContributionsCount"])
