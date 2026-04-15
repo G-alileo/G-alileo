@@ -31,8 +31,8 @@ jobs:
 
       - name: Commit & push if changed
         run: |
-          git config user.name  "G-alileo Bot"
+          git config user.name  "G-alileo Agent"
           git config user.email "jamespmurithi@gmail.com"
           git add profile-stats.svg
-          git diff --staged --quiet || git commit -m "chore: update profile stats [skip ci]"
+          git diff --staged --quiet || git commit -m "chore: update profile stats"
           git push
