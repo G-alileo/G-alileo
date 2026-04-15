@@ -75,7 +75,7 @@ class JamesMurithi:
 
 <div align="center">
 
-*Open to collabs. If you're building something real — let's talk.*
+*Open to collabs. If you're building something real. let's talk.*
 
 **[jamespmurithi@gmail.com](mailto:jamespmurithi@gmail.com)**
 
